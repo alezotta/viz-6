@@ -9,8 +9,6 @@ let svg = d3.selectAll("body")
 .style("background", "#f9f8f4")
 //.style("border", "1px solid #919191")
 
-
-
 //scales
 let x = d3.scaleLog()
 .range([0 + margin, width])
@@ -55,14 +53,6 @@ enter.append("text")
 	.attr("class", d => "stateLabel_" + d.continent + " label")
 	.style("mix-blend-mode", "multiply")
 
-/*enter.append("text")
-	.attr("x", d => x(d.priceperlb))
-	.attr("y", d => y(d.totalprod) - 12)
-	.text(d => d.year)
-	.attr("class", d => "stateYear_" + d.state + " year")
-	.style("fill", d => color(d.year))
-	.style("mix-blend-mode", "multiply")*/
-
 enter.append("rect")
 	.attr("width", d => size(d.ff_mln))
 	.attr("height", d => size(d.ff_mln))
@@ -89,43 +79,4 @@ enter.append("rect")
     	d3.selectAll(".label").style("opacity", 1)
    })
 
-
-/*enter.append("line")
-	.attr("x1", d => x(d.priceperlb))
-	.attr("y1", d => y(d.totalprod))
-	.attr("x2", d => x(d.priceperlb) + 100)
-	.attr("y2", d => y(d.totalprod) + 100)
-	.attr("stroke", "#000000")
-	.attr("stroke-width", 0.5)*/
-
-/* linee di collegamento stesso State
-
-let dataByState = d3.nest()
-  .key( d=> d.state)
-  .entries(data)
-
-let lineGenerator = d3.line()
-    .x( d=> x(d.priceperlb))
-    .y( d=> y(d.totalprod))
-
-dataByState.forEach( state => {
-	let lineData = state.values
-
-	svg.append("path")
-	  .attr("d", lineGenerator(lineData))
-	  .attr("stroke", "black")
-	  .attr("stroke-width", 1)
-	  .attr("fill", "none")
-	  .attr("class", d => "stateLine_" + state.key)
-	  .attr("opacity", 0)
-	})*/
-
 })
-
-	/*prendere i data point
-	grupparli per stato (d3.nest) -> ciclo per ogni stato, dentro ogni stato un altro ciclo per ogni anno
-	ordinarli per data
-	disegnare path per ogni g stato
-	path ha dentro tutti i punti (ogni data)*/
-
-	//console.log(JSON.stringify(data, null, "\t"));
