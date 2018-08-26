@@ -33,6 +33,10 @@ let xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format(".2s")).tickSize(-he
 
 let yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
 
+let color = d3.scaleLinear()
+.interpolate(d3.interpolateHcl)
+.range([d3.rgb("#ff0000"), d3.rgb("#0000ff")])
+
 d3.csv("viz_6.csv", function(error, data) {
 	if (error) throw error
 
@@ -45,6 +49,8 @@ d3.csv("viz_6.csv", function(error, data) {
 	/*yScale.domain(d3.extent(data, d => +d.GINI_index))*/
 
 	size.domain(d3.extent(data, d => +d.ff_mln))
+
+	color.domain(d3.extent(data, d => +d.continent))
 
 let enter = svg.selectAll("svg")
 	.data(data)
@@ -90,7 +96,54 @@ let enter = svg.selectAll("svg")
 	.style("fill", "#191919")
 	.attr("class", d => "stateLabel_" + d.continent + " label")*/
 
+svg.append("g")
+	.attr("class", "x axis")
+	.attr("transform", "translate(0," + (height) + ")")
+	.call(xAxis)
 
+svg.append("g")
+	.attr("class", "y axis")
+	.attr("transform", "translate(" + margin + ",0)")
+	.call(yAxis)
+
+
+let squares = svg.selectAll("svg")
+	.data(data)
+	.enter()
+	.append("rect")
+        .attr("class", d => "square_" + d.continent + " square")
+	    .style("fill-opacity", 0.4)
+		.style("fill", "#fcc64f")
+		.style("stroke-width", 1)
+	    .style("stroke", "#fcc64f")
+	    .style("stroke-opacity", 1)
+		.style("mix-blend-mode", "multiply")
+	    .attr("width", d => size(d.ff_mln))
+		.attr("height", d => size(d.ff_mln))
+	    .attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2)
+        .attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
+    
+    
+       
+let circles = svg.append("g")
+      .selectAll(".circle")
+        .data(data)
+       .enter().append("circle")
+       	.attr("fill", "#191919")
+		.attr("r", 1)
+    	.attr("cx", d => x(d.muslim_population))
+        .attr("cy", d => y(d.GINI_index))
+        .style("mix-blend-mode", "multiply")
+	   
+let labels = svg.append("g")
+      .selectAll(".circle")
+        .data(data)
+       .enter().append("text")
+       	.attr("class", d => "label_" + d.continent + " label")
+		.attr("x", d => x(d.muslim_population))
+		.attr("y", d => y(d.GINI_index) - 2)
+		.text(d => d.country)
+		.style("mix-blend-mode", "multiply")
 
     // Add an x-axis label.
 svg.append("text")
@@ -110,81 +163,44 @@ svg.append("text")
       .attr("transform", "rotate(-90)")
       .text("GINI index");
 
-let squares = svg.append("g")
-      .selectAll(".square")
-        .data(data)
-      .enter().append("rect")
-        .attr("class", "square")
-	    .style("fill-opacity", 0.4)
-		.style("fill", "#fcc64f")
-		.style("stroke-width", 1)
-	    .style("stroke", "#fcc64f")
-	    .style("stroke-opacity", 1)
-		.style("mix-blend-mode", "multiply")
-	    .attr("width", d => size(d.ff_mln))
-		.attr("height", d => size(d.ff_mln))
-	    .attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2)
-        .attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
-       
-let circles = svg.append("g")
-      .selectAll(".circle")
-        .data(data)
-       .enter().append("circle")
-       	.attr("fill", "#191919")
-		.attr("r", 1)
-    	.attr("cx", d => x(d.muslim_population))
-        .attr("cy", d => y(d.GINI_index))
-        .style("mix-blend-mode", "multiply")
-	   
-let labels = svg.append("g")
-      .selectAll(".circle")
-        .data(data)
-       .enter().append("text")
-       	.attr("class", "label")
-		.attr("x", d => x(d.muslim_population))
-		.attr("y", d => y(d.GINI_index) - 2)
-		.text(d => d.country)
-		.style("mix-blend-mode", "multiply")
+svg.on("mousemove", function() {
+    let mouse = d3.mouse(this);
+    xScale.distortion(3).focus(mouse[0]);
+    yScale.distortion(3).focus(mouse[1]);
 
+    squares.attr("x", d => xScale(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => yScale(d.GINI_index) - size(d.ff_mln)/2)
+    circles.attr("cx", d => xScale(d.muslim_population)).attr("cy", d => yScale(d.GINI_index))
+    labels.attr("x", d => xScale(d.muslim_population)).attr("y", d => yScale(d.GINI_index) - 2)
 
-svg.append("g")
-	.attr("class", "x axis")
-	.attr("transform", "translate(0," + (height) + ")")
-	.call(xAxis)
+    xAxis = d3.axisBottom(xScale).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
+    yAxis = d3.axisLeft(yScale).ticks(5).tickSize(-width + margin)
+    svg.select(".x.axis").call(xAxis)
+    svg.select(".y.axis").call(yAxis)
+})
 
-svg.append("g")
-	.attr("class", "y axis")
-	.attr("transform", "translate(" + margin + ",0)")
-	.call(yAxis)
+squares.on("mouseover", d => {
+		d3.selectAll("label").style("fill-opacity", 0.1)
+		d3.selectAll(".square_" + d.continent).style("fill-opacity", 1)
+		d3.selectAll(".label_" + d.continent).style("fill-opacity", 1)
+	})
 
-    svg.on("mousemove", function() {
-	    let mouse = d3.mouse(this);
-	    xScale.distortion(3).focus(mouse[0]);
-	    yScale.distortion(3).focus(mouse[1]);
+squares.on("mouseout", function() {
+		d3.selectAll(".square").style("fill-opacity", 0.4)
+	})
 
-	    squares.attr("x", d => xScale(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => yScale(d.GINI_index) - size(d.ff_mln)/2);
-	    circles.attr("cx", d => xScale(d.muslim_population)).attr("cy", d => yScale(d.GINI_index));
-	    labels.attr("x", d => xScale(d.muslim_population)).attr("y", d => yScale(d.GINI_index) - 2)
+svg.on("mouseout", function() {
+    reset()
+    })
 
-	    xAxis = d3.axisBottom(xScale).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
-	    yAxis = d3.axisLeft(yScale).ticks(5).tickSize(-width + margin)
-	    svg.select(".x.axis").call(xAxis);
-	    svg.select(".y.axis").call(yAxis);
-  })
+function reset() {
+    squares.attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
+    circles.attr("cx", d => x(d.muslim_population)).attr("cy", d => y(d.GINI_index))
+    labels.attr("x", d => x(d.muslim_population)).attr("y", d => y(d.GINI_index) - 2)
 
-    svg.on("mouseout", function() {
-      reset();
-  })
-
-    function reset() {
-	    squares.attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
-	    circles.attr("cx", d => x(d.muslim_population)).attr("cy", d => y(d.GINI_index))
-	    labels.attr("x", d => x(d.muslim_population)).attr("y", d => y(d.GINI_index) - 2)
-
-	    xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
-		yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
-		svg.select(".x.axis").call(xAxis);
-	    svg.select(".y.axis").call(yAxis);
-    }
+    xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
+	yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
+	svg.select(".x.axis").call(xAxis)
+    svg.select(".y.axis").call(yAxis)
+	}
 
 })
