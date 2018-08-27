@@ -2,14 +2,17 @@ let width = 900
 let height = 520
 let margin = 50
 
-let force = 2
+let force = 2.84
+
+//scala dei quadrati
+let dimMin = 0
+let dimMax = 50
 
 let svg = d3.selectAll("body")
 .append("svg")
 .attr("width", width + margin)
 .attr("height", height + margin)
 .style("background", "#f9f8f4")
-//.style("border", "1px solid #919191")
 
 //scales
 let x = d3.scaleLog()
@@ -21,7 +24,7 @@ let y = d3.scaleLinear()
 .range([height, margin])
 
 let size = d3.scaleSqrt()
-.range([0,60])
+.range([dimMin,dimMax])
 
 let xScale = d3.fisheye.scale(d3.scaleLog)
 .domain([0,210000000])
@@ -31,9 +34,9 @@ let yScale = d3.fisheye.scale(d3.scaleLinear)
 .domain([0,100])
 .range([height, margin])
 
-let xAxis = d3.axisBottom(x).ticks(5).tickFormat(d3.format(".2s")).tickSize(-height + margin)
+let xAxis = d3.axisBottom(x).ticks(5).tickFormat(d3.format(".2s")).tickSize(- height + margin)
 
-let yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
+let yAxis = d3.axisLeft(y).ticks(5).tickSize(- width + margin)
 
 let color = d3.scaleLinear()
 .interpolate(d3.interpolateHcl)
@@ -108,13 +111,12 @@ svg.append("g")
 	.attr("transform", "translate(" + margin + ",0)")
 	.call(yAxis)
 
-
 let squares = svg.selectAll("svg")
 	.data(data)
 	.enter()
 	.append("rect")
         .attr("class", d => "square_" + d.continent + " square")
-	    .style("fill-opacity", 0.4)
+	    .style("fill-opacity", 0.5)
 		.style("fill", "#fcc64f")
 		.style("stroke-width", 1)
 	    .style("stroke", "#fcc64f")
@@ -125,7 +127,6 @@ let squares = svg.selectAll("svg")
 	    .attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2)
         .attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
         .attr("transform", d => `rotate(-45 ${x(d.muslim_population)} ${y(d.GINI_index)})`)
-    
     
 let circles = svg.append("g")
       .selectAll(".circle")
@@ -146,6 +147,7 @@ let labels = svg.append("g")
 		.attr("y", d => y(d.GINI_index) - 2)
 		.text(d => d.country)
 		.style("mix-blend-mode", "multiply")
+		.attr("opacity", 0.4)
 
     // Add an x-axis label.
 svg.append("text")
@@ -170,22 +172,21 @@ svg.on("mousemove", function() {
     xScale.distortion(force).focus(mouse[0]);
     yScale.distortion(force).focus(mouse[1]);
 
-    squares.attr("x", d => xScale(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => yScale(d.GINI_index) - size(d.ff_mln)/2)
+    squares.attr("x", d => xScale(d.muslim_population) - size(d.ff_mln)/2)
+    .attr("y", d => yScale(d.GINI_index) - size(d.ff_mln)/2)
     .attr("transform", d => `rotate(-45 ${xScale(d.muslim_population)} ${yScale(d.GINI_index)})`)
+
     circles.attr("cx", d => xScale(d.muslim_population)).attr("cy", d => yScale(d.GINI_index))
-    labels.attr("x", d => xScale(d.muslim_population)).attr("y", d => yScale(d.GINI_index) - 2)
+
+    labels.attr("x", d => xScale(d.muslim_population))
+	.attr("y", d => yScale(d.GINI_index) - 2)
+    .attr("opacity", 1)
 
     xAxis = d3.axisBottom(xScale).ticks(5).tickFormat(d3.format(".2s")).tickSize(-height + margin)
     yAxis = d3.axisLeft(yScale).ticks(5).tickSize(-width + margin)
     svg.select(".x.axis").call(xAxis)
     svg.select(".y.axis").call(yAxis)
 })
-
-/*squares.on("mouseover", d => {
-		d3.selectAll("label").style("fill-opacity", 0.1)
-		d3.selectAll(".square_" + d.continent).style("fill-opacity", 1)
-		d3.selectAll(".label_" + d.continent).style("fill-opacity", 1)
-	})*/
 
 squares.on("mouseout", function() {
 		d3.selectAll(".square").style("fill-opacity", 0.4)
@@ -196,11 +197,15 @@ svg.on("mouseout", function() {
     })
 
 function reset() {
-    squares.attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
+    squares.attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2)
+    .attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
     .attr("transform", d => `rotate(-45 ${x(d.muslim_population)} ${y(d.GINI_index)})`)
+
     
     circles.attr("cx", d => x(d.muslim_population)).attr("cy", d => y(d.GINI_index))
-    labels.attr("x", d => x(d.muslim_population)).attr("y", d => y(d.GINI_index) - 2)
+    labels.attr("x", d => x(d.muslim_population))
+    .attr("y", d => y(d.GINI_index) - 2)
+	.attr("opacity", 0.4)
 
     xAxis = d3.axisBottom(x).ticks(5).tickFormat(d3.format(".2s")).tickSize(-height + margin)
 	yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
