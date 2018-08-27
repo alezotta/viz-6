@@ -21,7 +21,7 @@ let y = d3.scaleLinear()
 .range([height, margin])
 
 let size = d3.scaleSqrt()
-.range([1,80])
+.range([0,60])
 
 let xScale = d3.fisheye.scale(d3.scaleLog)
 .domain([0,210000000])
@@ -31,7 +31,7 @@ let yScale = d3.fisheye.scale(d3.scaleLinear)
 .domain([0,100])
 .range([height, margin])
 
-let xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
+let xAxis = d3.axisBottom(x).ticks(5).tickFormat(d3.format(".2s")).tickSize(-height + margin)
 
 let yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
 
@@ -175,7 +175,7 @@ svg.on("mousemove", function() {
     circles.attr("cx", d => xScale(d.muslim_population)).attr("cy", d => yScale(d.GINI_index))
     labels.attr("x", d => xScale(d.muslim_population)).attr("y", d => yScale(d.GINI_index) - 2)
 
-    xAxis = d3.axisBottom(xScale).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
+    xAxis = d3.axisBottom(xScale).ticks(5).tickFormat(d3.format(".2s")).tickSize(-height + margin)
     yAxis = d3.axisLeft(yScale).ticks(5).tickSize(-width + margin)
     svg.select(".x.axis").call(xAxis)
     svg.select(".y.axis").call(yAxis)
@@ -202,7 +202,7 @@ function reset() {
     circles.attr("cx", d => x(d.muslim_population)).attr("cy", d => y(d.GINI_index))
     labels.attr("x", d => x(d.muslim_population)).attr("y", d => y(d.GINI_index) - 2)
 
-    xAxis = d3.axisBottom(x).ticks(10).tickFormat(d3.format(".2s")).tickSize(-height + margin)
+    xAxis = d3.axisBottom(x).ticks(5).tickFormat(d3.format(".2s")).tickSize(-height + margin)
 	yAxis = d3.axisLeft(y).ticks(5).tickSize(-width + margin)
 	svg.select(".x.axis").call(xAxis)
     svg.select(".y.axis").call(yAxis)
