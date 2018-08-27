@@ -2,6 +2,8 @@ let width = 900
 let height = 520
 let margin = 50
 
+let force = 2
+
 let svg = d3.selectAll("body")
 .append("svg")
 .attr("width", width + margin)
@@ -122,9 +124,9 @@ let squares = svg.selectAll("svg")
 		.attr("height", d => size(d.ff_mln))
 	    .attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2)
         .attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
+        .attr("transform", d => `rotate(-45 ${x(d.muslim_population)} ${y(d.GINI_index)})`)
     
     
-       
 let circles = svg.append("g")
       .selectAll(".circle")
         .data(data)
@@ -165,10 +167,11 @@ svg.append("text")
 
 svg.on("mousemove", function() {
     let mouse = d3.mouse(this);
-    xScale.distortion(3).focus(mouse[0]);
-    yScale.distortion(3).focus(mouse[1]);
+    xScale.distortion(force).focus(mouse[0]);
+    yScale.distortion(force).focus(mouse[1]);
 
     squares.attr("x", d => xScale(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => yScale(d.GINI_index) - size(d.ff_mln)/2)
+    .attr("transform", d => `rotate(-45 ${xScale(d.muslim_population)} ${yScale(d.GINI_index)})`)
     circles.attr("cx", d => xScale(d.muslim_population)).attr("cy", d => yScale(d.GINI_index))
     labels.attr("x", d => xScale(d.muslim_population)).attr("y", d => yScale(d.GINI_index) - 2)
 
@@ -178,11 +181,11 @@ svg.on("mousemove", function() {
     svg.select(".y.axis").call(yAxis)
 })
 
-squares.on("mouseover", d => {
+/*squares.on("mouseover", d => {
 		d3.selectAll("label").style("fill-opacity", 0.1)
 		d3.selectAll(".square_" + d.continent).style("fill-opacity", 1)
 		d3.selectAll(".label_" + d.continent).style("fill-opacity", 1)
-	})
+	})*/
 
 squares.on("mouseout", function() {
 		d3.selectAll(".square").style("fill-opacity", 0.4)
@@ -194,6 +197,8 @@ svg.on("mouseout", function() {
 
 function reset() {
     squares.attr("x", d => x(d.muslim_population) - size(d.ff_mln)/2).attr("y", d => y(d.GINI_index) - size(d.ff_mln)/2)
+    .attr("transform", d => `rotate(-45 ${x(d.muslim_population)} ${y(d.GINI_index)})`)
+    
     circles.attr("cx", d => x(d.muslim_population)).attr("cy", d => y(d.GINI_index))
     labels.attr("x", d => x(d.muslim_population)).attr("y", d => y(d.GINI_index) - 2)
 
